@@ -5,16 +5,21 @@ from time import sleep
 from selenium import webdriver  # 操作浏览器的工具
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
-import logging
+
+from tools import custom_logger
+from Configuration import Web_Info
+
+# Customized logging
+logger = custom_logger.getLogger('root')
+
 
 # 实现免登陆
-
 # 大麦网官网
-damai_url = 'https://www.damai.cn/'
+damai_url = Web_Info.URL
 # 登录
-login_url = 'https://passport.damai.cn/login?ru=https%3A%2F%2Fwww.damai.cn%2F'
+login_url = Web_Info.Login_URL
 # 抢票目标页
-target_url = 'https://detail.damai.cn/item.htm?spm=a2oeg.home.card_0.ditem_1.189f23e14VYx2h&id=679790080503'
+target_url = Web_Info.Target_URL
 
 
 class Concert:
@@ -27,14 +32,17 @@ class Concert:
 
     def login(self):
         if self.login_method == 0:
+            logger.info('Simulate log in')
             # 登录网址
             self.driver.get(login_url)
             print('###开始登录###')
         elif self.login_method == 1:
             # 创建文件夹, 文件是否存在
             if not os.path.exists('cookies.pkl'):
+                logger.info('Cannot find the file cookies.pkl, you need to login')
                 self.set_cookies()  # 没有文件的情况下, 登录一下
             else:
+                logger.info('Found the file cookies.pkl')
                 self.driver.get(target_url)  # 跳转到抢票页
                 self.get_cookie()  # 并且登录
 
@@ -53,7 +61,7 @@ class Concert:
         print('###扫码成功###')
         # get_cookies: driver里面的方法
         pickle.dump(self.driver.get_cookies(), open('cookies.pkl', 'wb'))  # self.driver.get_cookies() 获取cookies
-        print('###cookie保存成功###')
+        print('Save cookies.pkl file successfully')
         self.driver.get(target_url)
 
     # 如果已经有了cookie
@@ -66,19 +74,11 @@ class Concert:
                 'value': cookie.get('value')
             }
             self.driver.add_cookie(cookie_dict)
-            print(cookie)
-        print('###载入cookie###')
 
-    def test(self):
-        self.driver.get(damai_url)
-        print(self.driver.title.find('大麦网-全球演出赛事官方购票平台'))
-        logging.info("test")
+        logger.info('Loaded cookies.pkl successfully')
 
 
 if __name__ == '__main__':
-
-    from tools import custom_logger
-
-    log = custom_logger.getLogger('root')
-    log.info('This is a test')
-    log.warning('warning message')
+    logger.info('Program Start!')
+    con = Concert()
+    con.login()
