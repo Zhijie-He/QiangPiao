@@ -22,7 +22,7 @@ class Concert:
     def __init__(self):
         self.status = 0  # 状态, 表示当前操作执行到了哪个步骤
         self.login_method = 1  # {0:模拟登录, 1:cookie登录}自行选择登录的方式
-        # self.driver = webdriver.Chrome(executable_path=r'drive/chromedriver.exe')  # 当前浏览器驱动对象
+        # self.driver = webdriver.Chrome(executable_path=r'drive/chromedriver105.exe')  # 当前浏览器驱动对象
         self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
 
     def login(self):
@@ -76,9 +76,17 @@ class Concert:
 
 
 if __name__ == '__main__':
+    from selenium.webdriver import ChromeOptions
+    option = ChromeOptions()
+    option.add_experimental_option('excludeSwitches', ['enable-automation'])  # 开启实验性功能
+    browser = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=option)
+    # 修改get方法
+    script = '''
+    Object.defineProperty(navigator, 'webdriver', {
+    get: () => undefined
+    })
+    '''
+    browser.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {"source": script})
 
-    from tools import custom_logger
-
-    log = custom_logger.getLogger('root')
-    log.info('This is a test')
-    log.warning('warning message')
+    url = 'https://www.google.com'
+    browser.get(url)
