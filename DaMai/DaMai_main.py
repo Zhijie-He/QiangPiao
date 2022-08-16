@@ -79,6 +79,7 @@ class Concert:
 
 
 if __name__ == '__main__':
+
     logger.info('Program Start!')
     con = Concert()
     con.login()
